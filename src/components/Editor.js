@@ -581,8 +581,9 @@ body {
   </div>
   <div class="header-btns">
     <button class="btn btn-gray btn-sm" onclick="saveData()">💾 Kaydet</button>
-    <button class="btn btn-blue btn-sm" onclick="exportPDF()">📄 PDF</button>
-    <button class="btn btn-green btn-sm" onclick="doPrint()">🖨️ Yazdır</button>
+    <button class="btn btn-gray btn-sm" onclick="doPrintAll()">🖨️ Toplu Yazdır</button>
+    <button class="btn btn-blue btn-sm" onclick="exportPDFAll()">📄 Toplu PDF</button>
+    <button class="btn btn-green btn-sm" onclick="doPrint()">🖨️ Tekli Yazdır</button>
   </div>
 </header>
 
@@ -719,11 +720,17 @@ body {
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">📅 Fiyat Değişim Tarihi</label>
-            <input class="form-input" id="f-fdt" type="text" placeholder="GG.AA.YYYY" oninput="updateCurProduct()"/>
+            <div style="display:flex;gap:6px">
+              <input class="form-input" id="f-fdt" type="text" placeholder="GG.AA.YYYY" oninput="updateCurProduct()" style="flex:1"/>
+              <input type="date" id="f-fdt-picker" onchange="document.getElementById('f-fdt').value=formatDateTR(this.value);updateCurProduct()" style="width:44px;border:2px solid var(--gray-300);border-radius:8px;padding:4px;cursor:pointer;background:white;color:transparent;" title="Takvimden seç"/>
+            </div>
           </div>
           <div class="form-group">
-            <label class="form-label">📅 Etiket Tarihi</label>
-            <input class="form-input" id="f-et" type="text" placeholder="GG.AA.YYYY" oninput="updateCurProduct()"/>
+            <label class="form-label">📅 Etiket Basım Tarihi</label>
+            <div style="display:flex;gap:6px">
+              <input class="form-input" id="f-et" type="text" placeholder="GG.AA.YYYY" oninput="updateCurProduct()" style="flex:1"/>
+              <input type="date" id="f-et-picker" onchange="document.getElementById('f-et').value=formatDateTR(this.value);updateCurProduct()" style="width:44px;border:2px solid var(--gray-300);border-radius:8px;padding:4px;cursor:pointer;background:white;color:transparent;" title="Takvimden seç"/>
+            </div>
           </div>
         </div>
         <div class="form-group">
@@ -755,27 +762,101 @@ body {
         <button class="btn btn-green btn-full" style="margin-top:14px" onclick="showStep(4)">Devam Et →</button>
       </div>
 
-      <!-- STEP 4: QR -->
+      <!-- STEP 4: KOD -->
       <div id="step-4" class="panel-body" style="display:none">
-        <div class="section-title"><span class="icon">🔲</span> QR Kod İçeriği</div>
-        <div class="info-card">
-          <span class="info-icon">💡</span>
-          <span>QR koda hangi bilgilerin ekleneceğini seçin. Telefon veya okuyucu ile tarandığında bu bilgiler görünecektir.</span>
-        </div>
-        <div id="qr-field-list"></div>
-        <div style="background:var(--gray-100);border-radius:var(--radius-sm);padding:16px;margin-top:14px">
-          <div style="font-size:16px;font-weight:800;color:var(--gray-700);margin-bottom:10px">+ Özel Bilgi Ekle</div>
-          <div class="form-row">
-            <div class="form-group"><input class="form-input" id="qr-custom-label" placeholder="Bilgi adı (örn: Lot No)"/></div>
-            <div class="form-group"><input class="form-input" id="qr-custom-val" placeholder="Değer (örn: LOT2026)"/></div>
+        <div class="section-title"><span class="icon">🔲</span> Barkod / QR Kod Ayarları</div>
+
+        <!-- Code type selector -->
+        <div style="margin-bottom:18px">
+          <div style="font-size:16px;font-weight:800;color:var(--gray-700);margin-bottom:10px">📌 Kod Türü Seçin:</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <button id="codetype-qr" class="btn btn-green" onclick="setCodeType('qr')" style="flex-direction:column;gap:4px;padding:14px 10px">
+              <span style="font-size:24px">🔲</span>
+              <span style="font-size:14px;font-weight:800">QR Kod</span>
+              <span style="font-size:11px;opacity:0.8">Metin/link içerebilir</span>
+            </button>
+            <button id="codetype-ean13" class="btn btn-gray" onclick="setCodeType('ean13')" style="flex-direction:column;gap:4px;padding:14px 10px">
+              <span style="font-size:24px">|||</span>
+              <span style="font-size:14px;font-weight:800">EAN-13 Barkod</span>
+              <span style="font-size:11px;opacity:0.8">Standart ürün barkodu</span>
+            </button>
           </div>
-          <button class="btn btn-green btn-sm" onclick="addCustomQrField()">Ekle</button>
         </div>
-        <div style="margin-top:16px">
-          <div style="font-size:15px;font-weight:800;color:var(--gray-600);margin-bottom:8px">QR İçerik Önizleme:</div>
-          <div class="qr-preview-box" id="qr-content-preview">—</div>
-          <div style="display:flex;justify-content:center">
-            <div id="qr-big-preview"></div>
+
+        <!-- QR section -->
+        <div id="qr-section">
+          <div class="info-card">
+            <span class="info-icon">💡</span>
+            <span>QR koda hangi bilgilerin ekleneceğini seçin. Telefon veya okuyucu ile tarandığında bu bilgiler görünecektir.</span>
+          </div>
+          <div id="qr-field-list"></div>
+          <div style="background:var(--gray-100);border-radius:var(--radius-sm);padding:16px;margin-top:14px">
+            <div style="font-size:16px;font-weight:800;color:var(--gray-700);margin-bottom:10px">+ Özel Bilgi Ekle</div>
+            <div class="form-row">
+              <div class="form-group"><input class="form-input" id="qr-custom-label" placeholder="Bilgi adı (örn: Lot No)"/></div>
+              <div class="form-group"><input class="form-input" id="qr-custom-val" placeholder="Değer (örn: LOT2026)"/></div>
+            </div>
+            <button class="btn btn-green btn-sm" onclick="addCustomQrField()">Ekle</button>
+          </div>
+          <div style="margin-top:16px">
+            <div style="font-size:15px;font-weight:800;color:var(--gray-600);margin-bottom:8px">QR İçerik Önizleme:</div>
+            <div class="qr-preview-box" id="qr-content-preview">—</div>
+            <div style="display:flex;justify-content:center">
+              <div id="qr-big-preview"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EAN-13 section -->
+        <div id="ean13-section" style="display:none">
+          <div class="info-card">
+            <span class="info-icon">💡</span>
+            <span>EAN-13 barkodu için tam 13 haneli sayı gereklidir. Ürün barkod numarası kullanılacaktır.</span>
+          </div>
+          <div style="background:var(--gray-50);border:2px solid var(--gray-200);border-radius:var(--radius-sm);padding:16px;margin-bottom:14px">
+            <div style="font-size:15px;font-weight:800;color:var(--gray-700);margin-bottom:8px">Barkod Kaynağı:</div>
+            <label style="display:flex;align-items:center;gap:10px;font-size:16px;cursor:pointer;margin-bottom:8px">
+              <input type="radio" name="ean-src" value="barkod" checked onchange="renderLabel()" style="width:18px;height:18px;accent-color:var(--green)"/>
+              Ürün Barkod Numarasını Kullan
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;font-size:16px;cursor:pointer">
+              <input type="radio" name="ean-src" value="custom" onchange="renderLabel()" style="width:18px;height:18px;accent-color:var(--green)"/>
+              Özel Barkod Numarası
+            </label>
+            <input class="form-input" id="ean-custom-val" placeholder="13 haneli barkod (örn: 8691530013718)" style="margin-top:10px" oninput="renderLabel()"/>
+          </div>
+          <div style="margin-top:14px;background:var(--gray-50);border:2px solid var(--gray-200);border-radius:var(--radius-sm);padding:14px">
+            <div style="font-size:15px;font-weight:800;color:var(--gray-700);margin-bottom:10px">📏 Barkod Boyutu Ayarı</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--gray-600);margin-bottom:6px">Alan Genişliği (mm)</div>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <button class="size-btn" onclick="resizeQrElem('w',-2)">−</button>
+                  <span id="ean-w-val" style="min-width:46px;text-align:center;font-weight:800;color:var(--green-dark);font-size:14px">—</span>
+                  <button class="size-btn" onclick="resizeQrElem('w',2)">+</button>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--gray-600);margin-bottom:6px">Alan Yüksekliği (mm)</div>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <button class="size-btn" onclick="resizeQrElem('h',-1)">−</button>
+                  <span id="ean-h-val" style="min-width:46px;text-align:center;font-weight:800;color:var(--green-dark);font-size:14px">—</span>
+                  <button class="size-btn" onclick="resizeQrElem('h',1)">+</button>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:10px">
+              <div style="font-size:13px;font-weight:700;color:var(--gray-600);margin-bottom:6px">Rakam Yazı Boyutu</div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <button class="size-btn" onclick="changeEanFontSize(-1)">−</button>
+                <span id="ean-fs-val" style="min-width:52px;text-align:center;font-size:16px;font-weight:900;color:var(--green-dark);background:var(--green-xlight);border:2px solid var(--green-light);border-radius:7px;padding:3px 0">6pt</span>
+                <button class="size-btn" onclick="changeEanFontSize(1)">+</button>
+                <input type="range" min="4" max="24" value="6" id="ean-fs-range" oninput="setEanFontSize(parseInt(this.value))" style="flex:1;accent-color:var(--green)"/>
+              </div>
+            </div>
+          </div>
+          <div style="background:white;border:2px solid var(--gray-200);border-radius:var(--radius-sm);padding:16px;display:flex;align-items:center;justify-content:center;min-height:90px">
+            <canvas id="ean13-preview-canvas" style="max-width:100%"></canvas>
           </div>
         </div>
       </div>
@@ -807,6 +888,47 @@ body {
           <span>Etiketteki yazılara <strong>tıklayarak sürükleyin</strong>. <strong>Çift tıklayarak</strong> metni düzenleyin.</span>
         </div>
 
+        <!-- Selected element resize panel -->
+        <div id="sel-elem-panel" style="display:none;background:var(--blue-light);border:2px solid #93c5fd;border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px">
+          <div style="font-size:15px;font-weight:800;color:var(--blue);margin-bottom:10px">⚙️ Seçili Alan: <span id="sel-elem-name">—</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--gray-600);margin-bottom:4px">GENİŞLİK (mm)</div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <button class="size-btn" onclick="resizeElem('w',-1)">−</button>
+                <span id="sel-w" style="min-width:42px;text-align:center;font-weight:800;font-size:15px;color:var(--blue-dark)">—</span>
+                <button class="size-btn" onclick="resizeElem('w',1)">+</button>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--gray-600);margin-bottom:4px">YÜKSEKLİK (mm)</div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <button class="size-btn" onclick="resizeElem('h',-0.5)">−</button>
+                <span id="sel-h" style="min-width:42px;text-align:center;font-weight:800;font-size:15px;color:var(--blue-dark)">—</span>
+                <button class="size-btn" onclick="resizeElem('h',0.5)">+</button>
+              </div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--gray-600);margin-bottom:4px">YAZI BOYUTU (pt)</div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <button class="size-btn" onclick="changeFontSizeSelected(-1)">−</button>
+                <span id="sel-fs" style="min-width:42px;text-align:center;font-weight:800;font-size:15px;color:var(--green-dark)">—</span>
+                <button class="size-btn" onclick="changeFontSizeSelected(1)">+</button>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--gray-600);margin-bottom:4px">HİZALAMA</div>
+              <div style="display:flex;gap:4px">
+                <button class="align-btn" id="sel-align-left" onclick="setAlignSelected('left')" title="Sola">◀</button>
+                <button class="align-btn" id="sel-align-center" onclick="setAlignSelected('center')" title="Ortala">●</button>
+                <button class="align-btn" id="sel-align-right" onclick="setAlignSelected('right')" title="Sağa">▶</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Label canvas -->
         <div class="preview-area" id="preview-area">
           <div class="preview-wrapper" id="preview-wrapper">
@@ -815,9 +937,11 @@ body {
         </div>
 
         <!-- Print buttons -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">
-          <button class="btn btn-green btn-lg" onclick="doPrint()">🖨️ Yazdır</button>
-          <button class="btn btn-blue btn-lg" onclick="exportPDF()">📄 PDF Kaydet</button>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">
+          <button class="btn btn-green" onclick="doPrint()" style="padding:13px 10px;font-size:15px">🖨️ Tekli Yazdır</button>
+          <button class="btn btn-blue" onclick="exportPDF()" style="padding:13px 10px;font-size:15px">📄 Tekli PDF</button>
+          <button class="btn btn-green" onclick="doPrintAll()" style="padding:13px 10px;font-size:15px;background:var(--green-dark)">🖨️ Toplu Yazdır<br/><small style="font-weight:600;opacity:0.85">(Tüm ürünler)</small></button>
+          <button class="btn btn-blue" onclick="exportPDFAll()" style="padding:13px 10px;font-size:15px;background:#1e40af">📄 Toplu PDF<br/><small style="font-weight:600;opacity:0.85">(Tüm ürünler)</small></button>
         </div>
 
         <!-- Product nav under preview -->
@@ -830,6 +954,45 @@ body {
           <button class="nav-arrow" onclick="nextProduct()">▶</button>
         </div>
 
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOSTING GUIDE -->
+<div style="max-width:1300px;margin:32px auto;padding:0 32px 40px">
+  <div style="background:white;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden">
+    <div style="background:var(--blue);color:white;padding:16px 22px;font-size:18px;font-weight:900">🌐 marketfiyatetiketi.com — Hosting Rehberi</div>
+    <div style="padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <div>
+        <div style="font-size:17px;font-weight:800;color:var(--gray-900);margin-bottom:12px">✅ Önerilen: Linux Hosting</div>
+        <div style="background:var(--green-xlight);border:2px solid var(--green-light);border-radius:10px;padding:14px;font-size:15px;line-height:1.8">
+          Bu proje tamamen <strong>tek bir HTML dosyası</strong>dır (sunucu kodu yok).<br/>
+          Bu nedenle <strong>herhangi bir statik hosting</strong> yeterlidir:<br/>
+          <ul style="margin:8px 0 0 20px">
+            <li><strong>Netlify</strong> (ücretsiz, önerilen) — netlify.com</li>
+            <li><strong>Vercel</strong> (ücretsiz) — vercel.com</li>
+            <li><strong>GitHub Pages</strong> (ücretsiz)</li>
+            <li>Linux cPanel hosting (~₺50/ay)</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:17px;font-weight:800;color:var(--gray-900);margin-bottom:12px">📋 Kurulum Adımları</div>
+        <div style="background:var(--gray-50);border:2px solid var(--gray-200);border-radius:10px;padding:14px;font-size:15px;line-height:2">
+          <ol style="margin:0 0 0 20px">
+            <li><strong>etiket-sistemi.html</strong> dosyasını <strong>index.html</strong> olarak yeniden adlandırın</li>
+            <li>Netlify.com'a ücretsiz kayıt olun</li>
+            <li>"New Site" → dosyayı sürükleyin</li>
+            <li>Domain ayarından <strong>marketfiyatetiketi.com</strong> ekleyin</li>
+            <li>Namecheap/GoDaddy'den domain alın (~$10/yıl)</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div style="padding:0 22px 22px">
+      <div style="background:#fffbeb;border:2px solid #fde68a;border-radius:10px;padding:14px;font-size:14px;color:#92400e">
+        💡 <strong>Not:</strong> Bu site tamamen tarayıcıda çalışır — PHP, MySQL, Node.js gibi sunucu teknolojisi <strong>gerekmez</strong>. Linux ve Windows hosting arasında fark yoktur. Sadece HTML dosyasını yükleyin, her şey hazır!
       </div>
     </div>
   </div>
@@ -860,15 +1023,17 @@ const ELEM_DEFS = [
   { id: 'fiyat',              type: 'price',  label: 'Fiyat',                field: 'fiyat',              bold: true,  defaultAlign: 'center' },
   { id: 'kiloFiyat',          type: 'kilo',   label: 'Kilo Fiyatı',          field: null,                 bold: false, defaultAlign: 'center' },
   { id: 'fiyatDegisimTarihi', type: 'field',  label: 'Fiyat Değişim Tarihi', field: 'fiyatDegisimTarihi', bold: false, defaultAlign: 'left',  prefix: 'Fiyat Değişim Tarihi : ' },
-  { id: 'etiketTarihi',       type: 'field',  label: 'Etiket Tarihi',        field: 'etiketTarihi',       bold: false, defaultAlign: 'left',  prefix: 'Etiket Tarihi : ' },
+  { id: 'etiketTarihi',       type: 'field',  label: 'Etiket Basım Tarihi',  field: 'etiketTarihi',       bold: false, defaultAlign: 'left',  prefix: 'Etiket Basım Tarihi : ' },
   { id: 'mensei',             type: 'field',  label: 'Menşei',               field: 'mensei',             bold: false, defaultAlign: 'left',  prefix: 'Ü.YERİ : ' },
-  { id: 'qr',                 type: 'qr',     label: 'QR Kod',               field: null,                 bold: false, defaultAlign: 'center' },
+  { id: 'qr',                 type: 'qr',     label: 'QR / Barkod',          field: null,                 bold: false, defaultAlign: 'center' },
   { id: 'barkod',             type: 'field',  label: 'Barkod No',            field: 'barkod',             bold: false, defaultAlign: 'center', mono: true },
 ];
 
+let codeType = 'qr'; // 'qr' | 'ean13'
+
 let fontSizes = { urunAdi: 14, fiyat: 20, kiloFiyat: 6, fiyatDegisimTarihi: 6, etiketTarihi: 6, mensei: 6, barkod: 6, kdvDahil: 6, qr: 6 };
 let aligns    = { urunAdi:'center', kdvDahil:'right', fiyat:'center', kiloFiyat:'center', fiyatDegisimTarihi:'left', etiketTarihi:'left', mensei:'left', qr:'center', barkod:'center' };
-let prefixes  = { urunAdi:'', kdvDahil:'', fiyat:'', kiloFiyat:'', fiyatDegisimTarihi:'Fiyat Değişim Tarihi : ', etiketTarihi:'Etiket Tarihi : ', mensei:'Ü.YERİ : ', qr:'', barkod:'' };
+let prefixes  = { urunAdi:'', kdvDahil:'', fiyat:'', kiloFiyat:'', fiyatDegisimTarihi:'Fiyat Değişim Tarihi : ', etiketTarihi:'Etiket Basım Tarihi : ', mensei:'Ü.YERİ : ', qr:'', barkod:'' };
 let customLabels = {};
 let margins   = { top: 1, bottom: 1, left: 1, right: 1 };
 let layout    = [];
@@ -986,35 +1151,47 @@ function renderLabel() {
 
     if (def.type === 'qr') {
       div.style.justifyContent = 'center';
-      const qrSize = Math.round(Math.min(iw, ih) - 2);
-      const qrContainer = document.createElement('div');
-      qrContainer.style.cssText = `width:${qrSize}px;height:${qrSize}px;flex-shrink:0;`;
-      const cacheKey = qrData + '_' + qrSize;
-      if (qrCache[cacheKey]) {
-        const img = document.createElement('img');
-        img.src = qrCache[cacheKey]; img.width = qrSize; img.height = qrSize;
-        img.style.imageRendering = 'pixelated';
-        qrContainer.appendChild(img);
+      div.style.alignItems = 'center';
+      if (codeType === 'ean13') {
+        // EAN-13 drawn on canvas
+        const canvas = document.createElement('canvas');
+        const eanNum = getEAN13Number(p);
+        const barH = ih - 4;
+        drawEAN13canvas(canvas, eanNum, iw - 2, barH);
+        canvas.style.cssText = `max-width:${iw}px;max-height:${ih}px;display:block;`;
+        div.appendChild(canvas);
       } else {
-        const tmp = document.createElement('div');
-        tmp.style.cssText = 'position:fixed;left:-9999px;';
-        document.body.appendChild(tmp);
-        try {
-          new QRCode(tmp, { text: qrData||' ', width: qrSize, height: qrSize, colorDark:'#000', colorLight:'#fff' });
-          setTimeout(() => {
-            const c = tmp.querySelector('canvas');
-            if (c) {
-              const src = c.toDataURL('image/png');
-              qrCache[cacheKey] = src;
-              qrContainer.innerHTML = `<img src="${src}" width="${qrSize}" height="${qrSize}" style="image-rendering:pixelated;display:block"/>`;
-            }
-            document.body.removeChild(tmp);
-          }, 100);
-        } catch { document.body.removeChild(tmp); }
-        qrContainer.textContent = 'QR';
-        qrContainer.style.cssText += 'font-size:8px;color:#aaa;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;';
+        // QR code
+        const qrSize = Math.round(Math.min(iw, ih) - 2);
+        const qrContainer = document.createElement('div');
+        qrContainer.style.cssText = `width:${qrSize}px;height:${qrSize}px;flex-shrink:0;`;
+        const cacheKey = qrData + '_' + qrSize;
+        if (qrCache[cacheKey]) {
+          const img = document.createElement('img');
+          img.src = qrCache[cacheKey]; img.width = qrSize; img.height = qrSize;
+          img.style.imageRendering = 'pixelated';
+          qrContainer.appendChild(img);
+        } else {
+          const tmp = document.createElement('div');
+          tmp.style.cssText = 'position:fixed;left:-9999px;';
+          document.body.appendChild(tmp);
+          try {
+            new QRCode(tmp, { text: qrData||' ', width: qrSize, height: qrSize, colorDark:'#000', colorLight:'#fff' });
+            setTimeout(() => {
+              const c = tmp.querySelector('canvas');
+              if (c) {
+                const src = c.toDataURL('image/png');
+                qrCache[cacheKey] = src;
+                qrContainer.innerHTML = `<img src="${src}" width="${qrSize}" height="${qrSize}" style="image-rendering:pixelated;display:block"/>`;
+              }
+              document.body.removeChild(tmp);
+            }, 100);
+          } catch { document.body.removeChild(tmp); }
+          qrContainer.textContent = 'QR';
+          qrContainer.style.cssText += 'font-size:8px;color:#aaa;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;';
+        }
+        div.appendChild(qrContainer);
       }
-      div.appendChild(qrContainer);
     } else {
       let text = '';
       if (def.type === 'price') {
@@ -1025,8 +1202,10 @@ function renderLabel() {
         text = prefix + (def.field ? (p[def.field]||'') : '');
       }
       div.style.justifyContent = align==='center'?'center':align==='right'?'flex-end':'flex-start';
+      div.style.alignItems = 'flex-start';
       const span = document.createElement('span');
-      span.style.cssText = `font-size:${fs}px;font-weight:${def.bold?900:400};line-height:1.3;font-family:${def.mono?'monospace':'Arial,Helvetica,sans-serif'};text-align:${align};display:block;width:100%;overflow:hidden;`;
+      // Text overflow: wrap within box, clip if still too long
+      span.style.cssText = `font-size:${fs}px;font-weight:${def.bold?900:400};line-height:1.3;font-family:${def.mono?'monospace':'Arial,Helvetica,sans-serif'};text-align:${align};display:block;width:100%;overflow:hidden;word-break:break-word;white-space:pre-wrap;max-height:${ih}px;`;
       span.textContent = text;
       div.appendChild(span);
     }
@@ -1034,11 +1213,16 @@ function renderLabel() {
     // Drag
     div.addEventListener('mousedown', startDrag);
     div.addEventListener('touchstart', startDragTouch, { passive: false });
+    // Click to select
+    div.addEventListener('click', e => { e.stopPropagation(); selElId=item.id; renderLabel(); updateSelPanel(); });
     // Double-click to edit
     div.addEventListener('dblclick', startInlineEdit);
 
     paper.appendChild(div);
   });
+
+  // Click on empty paper = deselect
+  paper.addEventListener('click', () => { selElId=null; updateSelPanel(); renderLabel(); }, {once:true});
 
   updateProductNav();
 }
@@ -1061,12 +1245,12 @@ function startDrag(e) {
     const dy = (me.clientY - startY) / (PX * zoom);
     item.x = Math.max(mg.left, Math.min(W - mg.right - item.w, startIx + dx));
     item.y = Math.max(mg.top,  Math.min(H - mg.bottom - item.h, startIy + dy));
-    renderLabel();
+    renderLabel(); updateSelPanel();
   };
-  const up = () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); renderLabel(); };
+  const up = () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); renderLabel(); updateSelPanel(); };
   window.addEventListener('mousemove', move);
   window.addEventListener('mouseup', up);
-  renderLabel();
+  renderLabel(); updateSelPanel();
 }
 function startDragTouch(e) {
   const t = e.touches[0];
@@ -1201,6 +1385,85 @@ function selectPreset(id) {
   buildLayout();
 }
 function onCustomSize() { buildLayout(); }
+
+// ─── DATE HELPER ─────────────────────────────────────────────────────────────
+function formatDateTR(isoDate) {
+  if (!isoDate) return '';
+  const [y,m,d] = isoDate.split('-');
+  return `${d}.${m}.${y}`;
+}
+
+// ─── SELECTED ELEMENT PANEL ──────────────────────────────────────────────────
+function updateSelPanel() {
+  const panel = document.getElementById('sel-elem-panel');
+  if (!selElId) { panel.style.display='none'; return; }
+  const item = layout.find(l=>l.id===selElId);
+  const def = ELEM_DEFS.find(e=>e.id===selElId);
+  if (!item || !def) { panel.style.display='none'; return; }
+  panel.style.display = 'block';
+  document.getElementById('sel-elem-name').textContent = customLabels[selElId] || def.label;
+  document.getElementById('sel-w').textContent = Math.round(item.w*10)/10 + ' mm';
+  document.getElementById('sel-h').textContent = Math.round(item.h*10)/10 + ' mm';
+  document.getElementById('sel-fs').textContent = (fontSizes[selElId]||6) + ' pt';
+  const align = aligns[selElId] || def.defaultAlign;
+  ['left','center','right'].forEach(a => {
+    const btn = document.getElementById('sel-align-'+a);
+    if (btn) btn.classList.toggle('active', align===a);
+  });
+}
+
+function resizeQrElem(dim, delta) {
+  const item = layout.find(l=>l.id==='qr');
+  if (!item) return;
+  const W=getLW(), H=getLH();
+  if (dim==='w') item.w = Math.max(5, Math.min(W, item.w+delta));
+  if (dim==='h') item.h = Math.max(5, Math.min(H, item.h+delta));
+  qrCache={};
+  renderLabel();
+  updateEanSizeDisplay();
+}
+
+function updateEanSizeDisplay() {
+  const item = layout.find(l=>l.id==='qr');
+  if (!item) return;
+  const wEl=document.getElementById('ean-w-val'), hEl=document.getElementById('ean-h-val');
+  if (wEl) wEl.textContent = Math.round(item.w*10)/10+' mm';
+  if (hEl) hEl.textContent = Math.round(item.h*10)/10+' mm';
+}
+
+function changeEanFontSize(delta) { setEanFontSize((fontSizes['qr']||6)+delta); }
+function setEanFontSize(v) {
+  v = Math.max(4, Math.min(24, v));
+  fontSizes['qr'] = v;
+  const el=document.getElementById('ean-fs-val'); if(el) el.textContent=v+'pt';
+  const rng=document.getElementById('ean-fs-range'); if(rng) rng.value=v;
+  qrCache={}; renderLabel();
+  // Refresh EAN preview
+  const c=document.getElementById('ean13-preview-canvas');
+  if(c) { const p=getCur(); drawEAN13canvas(c,getEAN13Number(p),280,Math.max(40,v*6)); }
+}
+
+function resizeElem(dim, delta) {
+  if (!selElId) return;
+  const item = layout.find(l=>l.id===selElId);
+  if (!item) return;
+  const W=getLW(), H=getLH();
+  if (dim==='w') item.w = Math.max(2, Math.min(W, item.w+delta));
+  if (dim==='h') item.h = Math.max(1, Math.min(H, item.h+delta));
+  renderLabel(); updateSelPanel();
+}
+
+function changeFontSizeSelected(delta) {
+  if (!selElId) return;
+  setFontSize(selElId, (fontSizes[selElId]||6)+delta);
+  updateSelPanel();
+}
+
+function setAlignSelected(v) {
+  if (!selElId) return;
+  setAlign(selElId, v);
+  updateSelPanel();
+}
 
 // ─── ZOOM ─────────────────────────────────────────────────────────────────────
 function changeZoom(delta) { setZoom(Math.max(0.3, Math.min(3, zoom + delta))); }
@@ -1382,10 +1645,9 @@ function loadData() {
 }
 
 // ─── PRINT / PDF ──────────────────────────────────────────────────────────────
-function getPrintHTML() {
+function getPrintHTML(prodOverride) {
   const W = getLW(), H = getLH();
-  const p = getCur();
-  const mg = getMg();
+  const p = prodOverride || getCur();
   const kilo = getKilo(p);
   const qrData = getQrData();
   let elems = '';
@@ -1396,44 +1658,263 @@ function getPrintHTML() {
     const fs=fontSizes[item.id]||6;
     const align=aligns[item.id]||def.defaultAlign;
     const prefix=prefixes[item.id]!==undefined?prefixes[item.id]:(def.prefix||'');
+    const jc=align==='center'?'center':align==='right'?'flex-end':'flex-start';
     if (def.type==='qr') {
-      const sz=Math.round(Math.min(iw,ih)-2);
-      elems+=`<div style="position:absolute;left:${x}px;top:${y}px;width:${iw}px;height:${ih}px;display:flex;align-items:center;justify-content:center"><div id="prqr" style="width:${sz}px;height:${sz}px"></div></div>`;
+      if (codeType === 'ean13') {
+        const canW=Math.round(iw-2), canH=Math.round(ih-4);
+        elems+=`<div style="position:absolute;left:${x}px;top:${y}px;width:${iw}px;height:${ih}px;display:flex;align-items:center;justify-content:center"><canvas id="prean" width="${canW}" height="${canH}"></canvas></div>`;
+      } else {
+        const sz=Math.round(Math.min(iw,ih)-2);
+        elems+=`<div style="position:absolute;left:${x}px;top:${y}px;width:${iw}px;height:${ih}px;display:flex;align-items:center;justify-content:center"><div id="prqr" style="width:${sz}px;height:${sz}px"></div></div>`;
+      }
     } else {
       let txt=def.type==='price'?(p.fiyat?Number(p.fiyat).toLocaleString('tr-TR',{minimumFractionDigits:2})+'₺':'—'):def.type==='kilo'?(kilo?`Kilo Fiyatı : ${kilo}₺`:''):(prefix+(def.field?(p[def.field]||''):''));
-      const jc=align==='center'?'center':align==='right'?'flex-end':'flex-start';
-      elems+=`<div style="position:absolute;left:${x}px;top:${y}px;width:${iw}px;height:${ih}px;overflow:hidden;display:flex;align-items:center;justify-content:${jc}"><span style="font-size:${fs}px;font-weight:${def.bold?900:400};line-height:1.3;font-family:${def.mono?'monospace':'Arial,Helvetica,sans-serif'};text-align:${align};display:block;width:100%;overflow:hidden">${txt}</span></div>`;
+      elems+=`<div style="position:absolute;left:${x}px;top:${y}px;width:${iw}px;height:${ih}px;overflow:hidden;display:flex;align-items:flex-start;justify-content:${jc}"><span style="font-size:${fs}px;font-weight:${def.bold?900:400};line-height:1.3;font-family:${def.mono?'monospace':'Arial,Helvetica,sans-serif'};text-align:${align};display:block;width:100%;overflow:hidden;word-break:break-word;white-space:pre-wrap;max-height:${ih}px">${txt.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span></div>`;
     }
   });
   return `<div style="width:${W*PX}px;height:${H*PX}px;background:white;border:1px solid #999;position:relative;font-family:Arial,Helvetica,sans-serif;color:#000;overflow:hidden">${elems}</div>`;
 }
 
+function getCodeScript(qrData, eanNum) {
+  if (codeType === 'ean13') {
+    return `var EL=[${EAN13_L.map(s=>`'${s}'`)}],EG=[${EAN13_G.map(s=>`'${s}'`)}],ER=[${EAN13_R.map(s=>`'${s}'`)}],EP=['LLLLLL','LLGLGG','LLGGLG','LLGGGL','LGLLGG','LGGLLG','LGGGLL','LGLGLG','LGLGGL','LGGLGL'];
+    function drawE(c,d){if(!d||d.length!==13)return;var bars='101',f=parseInt(d[0]),par=EP[f]||'LLLLLL';for(var i=1;i<=6;i++){var x=parseInt(d[i]);bars+=par[i-1]==='L'?EL[x]:EG[x];}bars+='01010';for(var i=7;i<=12;i++)bars+=ER[parseInt(d[i])];bars+='101';var bw=Math.max(1,Math.floor(c.width/95)),th=Math.max(8,Math.round(c.height*0.14)),bh=c.height-th-2,ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);for(var i=0;i<bars.length;i++){if(bars[i]==='1'){ctx.fillStyle='#000';var g=i<3||i>91||(i>=45&&i<=49);ctx.fillRect(i*bw,0,bw,g?bh+4:bh);}}ctx.fillStyle='#000';var fs=Math.max(6,Math.round(th*0.85));ctx.font=fs+'px Arial';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText(d[0],bw*1.5,c.height-1);var ls=3*bw;for(var i=1;i<=6;i++)ctx.fillText(d[i],ls+(i-0.5)*7*bw,c.height-1);var rs=(3+42+5)*bw;for(var i=7;i<=12;i++)ctx.fillText(d[i],rs+(i-6.5)*7*bw,c.height-1);}
+    var ce=document.getElementById('prean');if(ce)drawE(ce,'${eanNum}');`;
+  } else {
+    return `var el=document.getElementById('prqr');if(el){try{new QRCode(el,{text:'${(qrData||' ').replace(/'/g,"\\'")}',width:el.offsetWidth||60,height:el.offsetHeight||60,colorDark:'#000',colorLight:'#fff'});}catch{}}`;
+  }
+}
+
 function doPrint() {
-  const W=getLW(),H=getLH();
+  const W=getLW(), H=getLH();
   const qrData=getQrData();
+  const eanNum=getEAN13Number(getCur());
   const html=getPrintHTML();
-  const win=window.open('','_blank');
-  win.document.write(`<!DOCTYPE html><html><head><title>Etiket</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
-  <style>*{margin:0;padding:0;box-sizing:border-box;}@media print{@page{size:${W}mm ${H}mm;margin:0;}}body{background:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;}img{image-rendering:pixelated;display:block;}</style>
-  </head><body>${html}
-  <script>var el=document.getElementById('prqr');if(el){try{new QRCode(el,{text:'${qrData.replace(/'/g,"\\'")}',width:el.offsetWidth||60,height:el.offsetHeight||60,colorDark:'#000',colorLight:'#fff'});}catch{}}setTimeout(()=>window.print(),800);<\/script></body></html>`);
-  win.document.close(); win.focus();
+  const script=getCodeScript(qrData,eanNum)+'setTimeout(function(){window.print();},800);';
+  const css=`*{margin:0;padding:0;box-sizing:border-box;}@media print{@page{size:${W}mm ${H}mm;margin:0;}}body{background:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;}img{image-rendering:pixelated;display:block;}`;
+  openPrintWindow('Etiket', `<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>${html}`, script, css);
 }
 
 function exportPDF() {
-  const W=getLW(),H=getLH();
+  const W=getLW(), H=getLH();
   const qrData=getQrData();
+  const eanNum=getEAN13Number(getCur());
   const html=getPrintHTML();
-  const win=window.open('','_blank');
-  win.document.write(`<!DOCTYPE html><html><head><title>${getCur().urunAdi||'Etiket'}</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
-  <style>*{margin:0;padding:0;box-sizing:border-box;}@media print{@page{size:${W}mm ${H}mm;margin:0;}}body{background:#fff;padding:20px;display:flex;flex-direction:column;align-items:center;gap:16px;font-family:sans-serif;}.hint{font-size:13px;color:#666;padding:8px 16px;background:#f0f0f0;border-radius:6px;text-align:center;}img{image-rendering:pixelated;display:block;}</style>
-  </head><body>
-  <div class="hint">📄 PDF olarak kaydetmek için: <strong>Dosya → Yazdır → PDF Olarak Kaydet</strong> (${W}×${H}mm)</div>
-  ${html}
-  <script>var el=document.getElementById('prqr');if(el){try{new QRCode(el,{text:'${qrData.replace(/'/g,"\\'")}',width:el.offsetWidth||60,height:el.offsetHeight||60,colorDark:'#000',colorLight:'#fff'});}catch{}}setTimeout(()=>window.print(),800);<\/script></body></html>`);
-  win.document.close(); win.focus();
+  const hint=`<div style="font-size:13px;color:#555;background:#f5f5f5;padding:10px 16px;border-radius:6px;margin-bottom:16px;font-family:sans-serif;text-align:center">📄 PDF için: <strong>Yazdır → PDF Olarak Kaydet</strong> · ${W}×${H}mm</div>`;
+  const script=getCodeScript(qrData,eanNum)+'setTimeout(function(){window.print();},800);';
+  const css=`*{margin:0;padding:0;box-sizing:border-box;}@media print{@page{size:${W}mm ${H}mm;margin:0;}div[style*="background:#f5f5"]{display:none!important;}}body{background:#fff;padding:20px;display:flex;flex-direction:column;align-items:center;gap:16px;font-family:sans-serif;}img{image-rendering:pixelated;display:block;}`;
+  openPrintWindow(getCur().urunAdi||'Etiket', `<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>${hint}${html}`, script, css);
+}
+
+// ─── EAN-13 ENGINE ────────────────────────────────────────────────────────────
+// EAN-13 encoding tables
+const EAN13_L = ['0001101','0011001','0010011','0111101','0100011','0110001','0101111','0111011','0110111','0001011'];
+const EAN13_G = ['0100111','0110011','0011011','0100001','0011101','0111001','0000101','0010001','0001001','0010111'];
+const EAN13_R = ['1110010','1100110','1101100','1000010','1011100','1001110','1010000','1000100','1001000','1110100'];
+const EAN13_PARITY = ['LLLLLL','LLGLGG','LLGGLG','LLGGGL','LGLLGG','LGGLLG','LGGGLL','LGLGLG','LGLGGL','LGGLGL'];
+
+function calcEAN13Check(digits12) {
+  let s = 0;
+  for (let i=0; i<12; i++) s += parseInt(digits12[i]) * (i%2===0?1:3);
+  return (10 - (s%10)) % 10;
+}
+
+function getEAN13Number(p) {
+  const src = document.querySelector('input[name="ean-src"]:checked');
+  const useCustom = src && src.value === 'custom';
+  let raw = useCustom ? (document.getElementById('ean-custom-val')?.value||'') : (p.barkod||'');
+  raw = raw.replace(/\D/g,'');
+  if (raw.length < 12) raw = raw.padEnd(12,'0');
+  if (raw.length === 12) raw += calcEAN13Check(raw);
+  if (raw.length > 13) raw = raw.slice(0,13);
+  return raw;
+}
+
+function drawEAN13canvas(canvas, digits, maxW, maxH) {
+  if (!digits || digits.length !== 13) { digits = '0000000000000'; }
+  // Build bar pattern
+  const first = parseInt(digits[0]);
+  const parity = EAN13_PARITY[first] || 'LLLLLL';
+  let bars = '101'; // start
+  for (let i=1; i<=6; i++) {
+    const d = parseInt(digits[i]);
+    bars += parity[i-1]==='L' ? EAN13_L[d] : EAN13_G[d];
+  }
+  bars += '01010'; // middle guard
+  for (let i=7; i<=12; i++) {
+    bars += EAN13_R[parseInt(digits[i])];
+  }
+  bars += '101'; // end guard
+  // Total bars: 3+42+5+42+3 = 95
+  const totalBars = 95;
+  const barW = Math.max(1, Math.floor(maxW / totalBars));
+  const txtH = Math.max(8, Math.round(maxH * 0.14));
+  const barH = maxH - txtH - 2;
+  const totalW = barW * totalBars;
+  canvas.width = totalW;
+  canvas.height = maxH;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0,0,totalW,maxH);
+  // Draw bars
+  for (let i=0; i<bars.length; i++) {
+    if (bars[i]==='1') {
+      ctx.fillStyle='#000';
+      // Guard bars slightly taller
+      const isGuard = i<3 || i>91 || (i>=45&&i<=49);
+      ctx.fillRect(i*barW, 0, barW, isGuard ? barH+4 : barH);
+    }
+  }
+  // Draw digits below
+  ctx.fillStyle='#000';
+  const fSize = Math.max(6, Math.round(txtH * 0.85));
+  ctx.font = `${fSize}px Arial`;
+  ctx.textAlign='center';
+  ctx.textBaseline='bottom';
+  // First digit (before bars)
+  ctx.fillText(digits[0], barW*1.5, maxH-1);
+  // Left 6 digits
+  const lStart = 3 * barW;
+  for (let i=1; i<=6; i++) ctx.fillText(digits[i], lStart + (i-0.5)*7*barW, maxH-1);
+  // Right 6 digits
+  const rStart = (3+42+5)*barW;
+  for (let i=7; i<=12; i++) ctx.fillText(digits[i], rStart + (i-6.5)*7*barW, maxH-1);
+}
+
+function setCodeType(type) {
+  codeType = type;
+  document.getElementById('qr-section').style.display   = type==='qr'    ? 'block' : 'none';
+  document.getElementById('ean13-section').style.display = type==='ean13' ? 'block' : 'none';
+  document.getElementById('codetype-qr').className    = type==='qr'    ? 'btn btn-green' : 'btn btn-gray';
+  document.getElementById('codetype-ean13').className  = type==='ean13' ? 'btn btn-green' : 'btn btn-gray';
+  // Both buttons: flex column
+  ['codetype-qr','codetype-ean13'].forEach(id => { document.getElementById(id).style.cssText += ';flex-direction:column;gap:4px;padding:14px 10px'; });
+  qrCache = {};
+  renderLabel();
+  // Render EAN-13 preview
+  if (type==='ean13') {
+    const c = document.getElementById('ean13-preview-canvas');
+    if (c) drawEAN13canvas(c, getEAN13Number(getCur()), 280, 60);
+    updateEanSizeDisplay();
+  }
+}
+
+// ─── BULK PRINT / PDF ────────────────────────────────────────────────────────
+function buildAllLabelsHTML(forPDF) {
+  const W = getLW(), H = getLH();
+  // Snapshot selProd; iterate all products
+  const savedProd = selProd;
+
+  // EAN encoding tables (inlined for print window)
+  const EL_STR = EAN13_L.map(s=>`'${s}'`).join(',');
+  const EG_STR = EAN13_G.map(s=>`'${s}'`).join(',');
+  const ER_STR = EAN13_R.map(s=>`'${s}'`).join(',');
+  const eanScriptDef = `var EL=[${EL_STR}],EG=[${EG_STR}],ER=[${ER_STR}],EP=['LLLLLL','LLGLGG','LLGGLG','LLGGGL','LGLLGG','LGGLLG','LGGGLL','LGLGLG','LGLGGL','LGGLGL'];function drawEP(c,d){if(!d||d.length!==13)return;var bars='101',f=parseInt(d[0]),par=EP[f]||'LLLLLL';for(var i=1;i<=6;i++){var x=parseInt(d[i]);bars+=par[i-1]==='L'?EL[x]:EG[x];}bars+='01010';for(var i=7;i<=12;i++)bars+=ER[parseInt(d[i])];bars+='101';var bw=Math.max(1,Math.floor(c.width/95)),th=Math.max(8,Math.round(c.height*0.14)),bh=c.height-th-2,ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);for(var i=0;i<bars.length;i++){if(bars[i]==='1'){ctx.fillStyle='#000';var g=i<3||i>91||(i>=45&&i<=49);ctx.fillRect(i*bw,0,bw,g?bh+4:bh);}}ctx.fillStyle='#000';var fs2=Math.max(6,Math.round(th*0.85));ctx.font=fs2+'px Arial';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText(d[0],bw*1.5,c.height-1);var ls=3*bw;for(var i=1;i<=6;i++)ctx.fillText(d[i],ls+(i-0.5)*7*bw,c.height-1);var rs=(3+42+5)*bw;for(var i=7;i<=12;i++)ctx.fillText(d[i],rs+(i-6.5)*7*bw,c.height-1);}`;
+
+  let labelsHtml = '';
+  let initScript = '';
+
+  for (let i = 0; i < products.length; i++) {
+    selProd = i;
+    const p = products[i];
+    const kilo = getKilo(p);
+    const qrData = getQrDataForProduct(p);
+    const eanNum = getEAN13NumberForProduct(p);
+    let elems = '';
+
+    layout.forEach(item => {
+      const def = ELEM_DEFS.find(e=>e.id===item.id);
+      if (!def) return;
+      const x=item.x*PX, y=item.y*PX, iw=item.w*PX, ih=item.h*PX;
+      const fs=fontSizes[item.id]||6;
+      const align=aligns[item.id]||def.defaultAlign;
+      const prefix=prefixes[item.id]!==undefined?prefixes[item.id]:(def.prefix||'');
+      const jc=align==='center'?'center':align==='right'?'flex-end':'flex-start';
+      if (def.type==='qr') {
+        if (codeType==='ean13') {
+          const eanFs = fontSizes['qr'] || 6;
+          const canW=Math.round(iw-2), canH=Math.round(ih-4);
+          elems+=`<div style="position:absolute;left:${x}px;top:${y}px;width:${iw}px;height:${ih}px;display:flex;align-items:center;justify-content:center"><canvas id="ean_${i}" width="${canW}" height="${canH}"></canvas></div>`;
+          initScript+=`var c${i}=document.getElementById('ean_${i}');if(c${i})drawEP(c${i},'${eanNum}');`;
+        } else {
+          const sz=Math.round(Math.min(iw,ih)-2);
+          const safeQr=(qrData||' ').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+          elems+=`<div style="position:absolute;left:${x}px;top:${y}px;width:${iw}px;height:${ih}px;display:flex;align-items:center;justify-content:center"><div id="qr_${i}" style="width:${sz}px;height:${sz}px"></div></div>`;
+          initScript+=`try{new QRCode(document.getElementById('qr_${i}'),{text:'${safeQr}',width:${sz},height:${sz},colorDark:'#000',colorLight:'#fff'});}catch(e){}`;
+        }
+      } else {
+        let txt=def.type==='price'?(p.fiyat?Number(p.fiyat).toLocaleString('tr-TR',{minimumFractionDigits:2})+'₺':'—'):def.type==='kilo'?(kilo?`Kilo Fiyatı : ${kilo}₺`:''):(prefix+(def.field?(p[def.field]||''):''));
+        txt=txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        elems+=`<div style="position:absolute;left:${x}px;top:${y}px;width:${iw}px;height:${ih}px;overflow:hidden;display:flex;align-items:flex-start;justify-content:${jc}"><span style="font-size:${fs}px;font-weight:${def.bold?900:400};line-height:1.3;font-family:${def.mono?'monospace':'Arial,Helvetica,sans-serif'};text-align:${align};display:block;width:100%;overflow:hidden;word-break:break-word;white-space:normal;max-height:${ih}px">${txt}</span></div>`;
+      }
+    });
+
+    const isLast = i === products.length-1;
+    labelsHtml += `<div class="lbl" style="width:${W*PX}px;height:${H*PX}px;background:white;border:1px solid #999;position:relative;font-family:Arial,Helvetica,sans-serif;color:#000;overflow:hidden;${isLast?'':'margin-bottom:2mm;'}">${elems}</div>\n`;
+  }
+
+  selProd = savedProd;
+
+  const hint = forPDF ? `<div style="font-size:13px;color:#555;background:#f5f5f5;padding:10px 16px;border-radius:6px;margin-bottom:16px;font-family:sans-serif;text-align:center">📄 PDF için: <strong>Yazdır → Yazıcı: PDF Olarak Kaydet</strong> &nbsp;·&nbsp; Boyut: ${W}×${H}mm &nbsp;·&nbsp; ${products.length} etiket</div>` : '';
+  const css = `*{margin:0;padding:0;box-sizing:border-box;}body{background:#fff;font-family:sans-serif;}@media print{@page{size:${W}mm ${H}mm;margin:0;}.lbl{page-break-after:always;margin-bottom:0!important;}body{padding:0;}div[style*="background:#f5f5"]{display:none!important;}}`;
+
+  return { labelsHtml, eanScriptDef, initScript, hint, css };
+}
+
+// Helper: get QR data for a specific product without changing selProd state
+function getQrDataForProduct(p) {
+  const kilo = getKilo(p);
+  return qrFields.filter(f=>f.enabled).map(f=>{
+    if (f.type==='field') return p[f.field]||'';
+    if (f.type==='kilo')  return kilo?`Kilo:${kilo}`:'';
+    if (f.type==='custom') return f.value||'';
+    return '';
+  }).filter(Boolean).join('|');
+}
+
+// Helper: get EAN-13 number for a specific product
+function getEAN13NumberForProduct(p) {
+  const src = document.querySelector('input[name="ean-src"]:checked');
+  const useCustom = src && src.value==='custom';
+  let raw = useCustom ? (document.getElementById('ean-custom-val')?.value||'') : (p.barkod||'');
+  raw = raw.replace(/\D/g,'');
+  if (raw.length<12) raw=raw.padEnd(12,'0');
+  if (raw.length===12) raw+=calcEAN13Check(raw);
+  if (raw.length>13) raw=raw.slice(0,13);
+  return raw;
+}
+
+function openPrintWindow(title, bodyContent, scriptContent, css) {
+  // Use blob URL to avoid popup blocker issues with document.write
+  const fullHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>${title}</title><style>${css}</style></head><body>${bodyContent}<script>${scriptContent}<\/script></body></html>`;
+  const blob = new Blob([fullHtml], {type:'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const win = window.open(url, '_blank');
+  if (!win) {
+    // Fallback: create a temporary link and click it
+    const a = document.createElement('a');
+    a.href = url; a.target = '_blank'; a.click();
+  }
+  // Revoke after a delay
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+
+function doPrintAll() {
+  const { labelsHtml, eanScriptDef, initScript, hint, css } = buildAllLabelsHTML(false);
+  const qrLib = `<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>`;
+  const fullBody = `${hint}${labelsHtml}`;
+  const script = `${eanScriptDef}${initScript}setTimeout(function(){window.print();},1200);`;
+  openPrintWindow(`Toplu Baskı (${products.length} etiket)`, qrLib+fullBody, script, css);
+  showToast(`${products.length} etiket yazdırılıyor...`);
+}
+
+function exportPDFAll() {
+  const { labelsHtml, eanScriptDef, initScript, hint, css } = buildAllLabelsHTML(true);
+  const qrLib = `<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>`;
+  const fullBody = `${hint}${labelsHtml}`;
+  const script = `${eanScriptDef}${initScript}setTimeout(function(){window.print();},1200);`;
+  openPrintWindow(`Toplu PDF (${products.length} etiket)`, qrLib+fullBody, script, css);
+  showToast(`${products.length} etiket PDF hazırlanıyor...`);
 }
 
 // ─── STEPS ────────────────────────────────────────────────────────────────────
@@ -1447,7 +1928,7 @@ function showStep(n) {
     btn.classList.toggle('done', i<n);
   }
   if (n===3) renderFontEditor();
-  if (n===4) { renderQrFields(); updateQrPreview(); }
+  if (n===4) { renderQrFields(); updateQrPreview(); setCodeType(codeType); }
   renderLabel();
 }
 
