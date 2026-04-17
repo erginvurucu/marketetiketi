@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Market Fiyat Etiketi Sistemi</title>
+<title>Fiyat Etiketi Sistemi</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -576,7 +576,7 @@ body {
 <header class="site-header">
   <div class="header-logo">🏷️</div>
   <div>
-    <h1>Market Fiyat Etiketi Sistemi</h1>
+    <div class="header-title">Market Fiyat Etiketi Sistemi</div>
     <div class="header-sub">Kolay · Hızlı · Profesyonel</div>
   </div>
   <div class="header-btns">
@@ -678,6 +678,32 @@ body {
             <div class="nav-name" id="nav-name">—</div>
           </div>
           <button class="nav-arrow" id="nav-next" onclick="nextProduct()">▶</button>
+        </div>
+ 
+        <!-- GLOBAL DATE PANEL -->
+        <div style="background:#fff7ed;border:2px solid #fed7aa;border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">
+          <div style="font-size:16px;font-weight:900;color:#c2410c;margin-bottom:12px">🗓️ Tüm Ürünlere Toplu Tarih Uygula</div>
+          <div style="font-size:13px;color:#9a3412;margin-bottom:12px">Aşağıya girdiğiniz tarihler <strong>tüm ürünlere</strong> aynı anda uygulanır.</div>
+          <div class="form-row" style="margin-bottom:10px">
+            <div class="form-group">
+              <label class="form-label" style="font-size:14px">📅 Fiyat Değişim Tarihi</label>
+              <div style="display:flex;gap:6px">
+                <input class="form-input" id="global-fdt" type="text" placeholder="GG.AA.YYYY" style="flex:1;font-size:15px"/>
+                <input type="date" id="global-fdt-picker" onchange="document.getElementById('global-fdt').value=formatDateTR(this.value)" style="width:44px;border:2px solid #fed7aa;border-radius:8px;padding:4px;cursor:pointer;background:white;color:transparent;" title="Takvimden seç"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size:14px">📅 Etiket Basım Tarihi</label>
+              <div style="display:flex;gap:6px">
+                <input class="form-input" id="global-et" type="text" placeholder="GG.AA.YYYY" style="flex:1;font-size:15px"/>
+                <input type="date" id="global-et-picker" onchange="document.getElementById('global-et').value=formatDateTR(this.value)" style="width:44px;border:2px solid #fed7aa;border-radius:8px;padding:4px;cursor:pointer;background:white;color:transparent;" title="Takvimden seç"/>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-full" id="global-apply-btn" onclick="applyGlobalDates()" style="background:#ea580c;color:white;font-size:16px;padding:13px">
+            ✅ Tüm Ürünlere Uygula
+          </button>
+          <div id="global-date-result" style="display:none;margin-top:8px;color:#16a34a;font-size:14px;font-weight:700;text-align:center"></div>
         </div>
  
         <div class="info-card">
@@ -959,42 +985,72 @@ body {
   </div>
 </div>
  
-<!-- HOSTING GUIDE -->
+<!-- ABOUT SECTION -->
 <div style="max-width:1300px;margin:32px auto;padding:0 32px 40px">
   <div style="background:white;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden">
-    <div style="background:var(--blue);color:white;padding:16px 22px;font-size:18px;font-weight:900">🌐 marketfiyatetiketi.com — Market Fiyat Etiketi Tasarımı ve Yazdırma</div>
-    <div style="padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:24px">
-      <div>
-        <div style="font-size:17px;font-weight:800;color:var(--gray-900);margin-bottom:12px">✅ Market Etiketi İndir (Ücretsiz)</div>
-        <div style="background:var(--green-xlight);border:2px solid var(--green-light);border-radius:10px;padding:14px;font-size:15px;line-height:1.8">
-          Geliştirdiğimiz online araç sayesinde hiçbir programa ihtiyaç duymadan fiyat etiketi hazırlayabilirsiniz.<br/>
-          Bu sistem özellikle <strong>küçük işletmeler ve marketler</strong> için büyük kolaylık sağlar.<br/>
-          <ul style="margin:8px 0 0 20px">
-            <li><strong>Dik Market Etiketi</strong> 30x70mm Hazır Etiket Boyutu</li>
-            <li><strong>Yatay Geniş</strong> 80x33mm Hazır Etiket Boyutu</li>
-            <li><strong>Yatay Orta </strong> 50x35mm Hazır Etiket Boyutu</li>
-            <li>Özel etiket ölçüsü girerek kendi ölçünüze uygun market fiyat etiketi tasarımı yapabilirsiniz.</li>
-          </ul>
-        </div>
-      </div>
-      <div>
-        <div style="font-size:17px;font-weight:800;color:var(--gray-900);margin-bottom:12px">📋 Kullanımı</div>
-        <div style="background:var(--gray-50);border:2px solid var(--gray-200);border-radius:10px;padding:14px;font-size:15px;line-height:2">
-          <ol style="margin:0 0 0 20px">
-            <li><strong>Kendi fiyatlarınızı</strong> excel <strong>ile</strong> içeri aktarabilirsiniz.</li>
-            <li>Market etiketi şablonunu excel olarak indirebilirsiniz.</li>
-            <li>İster QR kodu kullabilirsiniz</li>
-            <li>Ürün <strong>Barkod</strong> otomatik olarak kendi yerleştirmektedir.</li>
-            <li>Tarih ve Menşei Bilgisi excelde ne yazıyorsa gelmektedir. ÖNEMLİ: QR KOD hatası almamak için Menşeide TÜRKÇE karakter kullanmayınız.</li>
-          <li>Ürün <strong>Barkod</strong> otomatik olarak kendi yerleştirmektedir.</li>
-          <li>Etiketi <strong>Özel Barkod Yazıcı ile</strong> termal karton veya etikete yazdırabilirsiniz.</li>
-        </ol>
-        </div>
-      </div>
+ 
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,var(--green),var(--green-dark));color:white;padding:28px 32px;text-align:center">
+      <div style="font-size:13px;font-weight:700;letter-spacing:0.1em;opacity:0.85;margin-bottom:8px;text-transform:uppercase">MarketFiyatEtiketi.com</div>
+      <h1 style="font-size:26px;font-weight:900;line-height:1.25;margin:0 0 10px">Profesyonel Market ve Mağaza<br/>Fiyat Etiketi Çözümleri</h1>
+      <p style="font-size:15px;opacity:0.9;max-width:680px;margin:0 auto;line-height:1.6">İşletmenizin raf düzenini profesyonel bir seviyeye taşımak ve fiyat karmaşasına son vermek için geliştirdiğimiz <strong>Mağaza Fiyat Etiket Editörü</strong>, hız ve estetiği bir araya getiriyor.</p>
     </div>
-    <div style="padding:0 22px 22px">
-      <div style="background:#fffbeb;border:2px solid #fde68a;border-radius:10px;padding:14px;font-size:14px;color:#92400e">
-        💡 <strong>Not:</strong> Ergin Vurucu tarafından tasarlanmıştır ve tamemnen  <strong>ücretsizdir.</strong>
+ 
+    <!-- Main text block -->
+    <div style="padding:28px 32px">
+      <p style="font-size:16px;color:var(--gray-700);line-height:1.8;margin-bottom:24px">Günümüz perakende dünyasında, doğru ve şık sunum satışları doğrudan etkiler. Kullanıcı dostu <strong>Raf Etiketi Tasarım Programı</strong> sayfamız sayesinde, teknik bilgiye ihtiyaç duymadan dakikalar içinde kurumsal görünümlü etiketler hazırlayabilirsiniz.</p>
+ 
+      <!-- Feature cards row -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px">
+        <div style="background:var(--green-xlight);border:2px solid var(--green-light);border-radius:12px;padding:18px">
+          <div style="font-size:28px;margin-bottom:8px">⚡</div>
+          <div style="font-size:15px;font-weight:900;color:var(--green-dark);margin-bottom:6px">Hızlı & Pratik</div>
+          <div style="font-size:14px;color:var(--gray-600);line-height:1.6">Küçük esnaftan büyük market zincirlerine kadar herkesin ihtiyacına hitap eden <strong>Bakkal Etiket Programı</strong> ve gelişmiş <strong>Market Fiyat Etiket Programı</strong> modüllerimizle tanışın.</div>
+        </div>
+        <div style="background:var(--blue-light);border:2px solid #93c5fd;border-radius:12px;padding:18px">
+          <div style="font-size:28px;margin-bottom:8px">📦</div>
+          <div style="font-size:15px;font-weight:900;color:var(--blue);margin-bottom:6px">Toplu Etiket Basma</div>
+          <div style="font-size:14px;color:var(--gray-600);line-height:1.6">Sektörde en çok ihtiyaç duyulan <strong>Toplu Market Etiketi Basma</strong> özelliği ile yüzlerce ürünün fiyatını aynı anda güncelleyebilir, zaman kaybının önüne geçebilirsiniz.</div>
+        </div>
+        <div style="background:#fff7ed;border:2px solid #fed7aa;border-radius:12px;padding:18px">
+          <div style="font-size:28px;margin-bottom:8px">🎁</div>
+          <div style="font-size:15px;font-weight:900;color:#c2410c;margin-bottom:6px">Ücretsiz Kullanım</div>
+          <div style="font-size:14px;color:var(--gray-600);line-height:1.6">Temel özelliklerimizi kullanmak için bir servet ödemenize gerek yok. <strong>Ücretsiz Fiyat Etiket Programı</strong> arayışındaki işletmeler için sunduğumuz çözümlerle maliyetlerinizi düşürüyoruz.</div>
+        </div>
+      </div>
+ 
+      <!-- Sektörel section -->
+      <div style="background:var(--gray-50);border-radius:12px;padding:22px;margin-bottom:24px">
+        <h2 style="font-size:19px;font-weight:900;color:var(--gray-900);margin-bottom:8px">🏪 Sektörel Raf Fiyat Etiketi Tasarımı</h2>
+        <p style="font-size:15px;color:var(--gray-600);line-height:1.7;margin-bottom:16px">Her mağazanın ruhu farklıdır. Bu yüzden <strong>Mağaza Raf Etiketi Programı</strong> aracımız; manav, şarküteri, kasap veya züccaciye gibi farklı alanlara özel <strong>Raf Fiyat Etiketi Tasarımı</strong> yapmanıza imkân tanır.</p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+          <div style="background:white;border:2px solid var(--gray-200);border-radius:10px;padding:14px">
+            <div style="font-size:20px;margin-bottom:6px">🏷️</div>
+            <div style="font-size:14px;font-weight:800;color:var(--gray-800);margin-bottom:4px">Mağaza Ürün Fiyat Etiketi</div>
+            <div style="font-size:13px;color:var(--gray-500);line-height:1.5">Şık, okunaklı ve modern tasarımlar.</div>
+          </div>
+          <div style="background:white;border:2px solid var(--gray-200);border-radius:10px;padding:14px">
+            <div style="font-size:20px;margin-bottom:6px">📊</div>
+            <div style="font-size:14px;font-weight:800;color:var(--gray-800);margin-bottom:4px">Market Ürün Fiyat Etiketi</div>
+            <div style="font-size:13px;color:var(--gray-500);line-height:1.5">Barkod uyumlu, standart ölçülerde seri üretim.</div>
+          </div>
+          <div style="background:white;border:2px solid var(--gray-200);border-radius:10px;padding:14px">
+            <div style="font-size:20px;margin-bottom:6px">📋</div>
+            <div style="font-size:14px;font-weight:800;color:var(--gray-800);margin-bottom:4px">Fiyat Etiket Programı</div>
+            <div style="font-size:13px;color:var(--gray-500);line-height:1.5">Excel entegrasyonu ile hatasız veri aktarımı.</div>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- CTA -->
+      <div style="background:linear-gradient(135deg,#1e3a5f,var(--blue));border-radius:12px;padding:22px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:17px;font-weight:900;color:white;margin-bottom:6px">MarketFiyatEtiketi.com</div>
+          <div style="font-size:14px;color:rgba(255,255,255,0.8);line-height:1.6">Sadece ürün satmıyor; işletmenizin operasyonel gücünü artıracak dijital araçlar sunuyoruz. Hemen <strong style="color:white">Mağaza Fiyat Etiket Editörü</strong> sistemimizi deneyin, raflarınızdaki profesyonel değişimi fark edin!</div>
+        </div>
+        <button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="btn" style="background:white;color:var(--blue);font-size:15px;padding:14px 24px;white-space:nowrap;flex-shrink:0">
+          🚀 Hemen Başla
+        </button>
       </div>
     </div>
   </div>
@@ -1026,7 +1082,7 @@ const ELEM_DEFS = [
   { id: 'kiloFiyat',          type: 'kilo',   label: 'Kilo Fiyatı',          field: null,                 bold: false, defaultAlign: 'center' },
   { id: 'fiyatDegisimTarihi', type: 'field',  label: 'Fiyat Değişim Tarihi', field: 'fiyatDegisimTarihi', bold: false, defaultAlign: 'left',  prefix: 'Fiyat Değişim Tarihi : ' },
   { id: 'etiketTarihi',       type: 'field',  label: 'Etiket Basım Tarihi',  field: 'etiketTarihi',       bold: false, defaultAlign: 'left',  prefix: 'Etiket Basım Tarihi : ' },
-  { id: 'mensei',             type: 'field',  label: 'Menşei',               field: 'mensei',             bold: false, defaultAlign: 'left',  prefix: 'Ü.YERİ : ' },
+  { id: 'mensei',             type: 'field',  label: 'Menşei',               field: 'mensei',             bold: false, defaultAlign: 'left',  prefix: 'Menşei : ' },
   { id: 'qr',                 type: 'qr',     label: 'QR / Barkod',          field: null,                 bold: false, defaultAlign: 'center' },
   { id: 'barkod',             type: 'field',  label: 'Barkod No',            field: 'barkod',             bold: false, defaultAlign: 'center', mono: true },
 ];
@@ -1035,7 +1091,7 @@ let codeType = 'qr'; // 'qr' | 'ean13'
  
 let fontSizes = { urunAdi: 14, fiyat: 20, kiloFiyat: 6, fiyatDegisimTarihi: 6, etiketTarihi: 6, mensei: 6, barkod: 6, kdvDahil: 6, qr: 6 };
 let aligns    = { urunAdi:'center', kdvDahil:'right', fiyat:'center', kiloFiyat:'center', fiyatDegisimTarihi:'left', etiketTarihi:'left', mensei:'left', qr:'center', barkod:'center' };
-let prefixes  = { urunAdi:'', kdvDahil:'', fiyat:'', kiloFiyat:'', fiyatDegisimTarihi:'Fiyat Değişim Tarihi : ', etiketTarihi:'Etiket Basım Tarihi : ', mensei:'Ü.YERİ : ', qr:'', barkod:'' };
+let prefixes  = { urunAdi:'', kdvDahil:'', fiyat:'', kiloFiyat:'', fiyatDegisimTarihi:'Fiyat Değişim Tarihi : ', etiketTarihi:'Etiket Basım Tarihi : ', mensei:'Menşei : ', qr:'', barkod:'' };
 let customLabels = {};
 let margins   = { top: 1, bottom: 1, left: 1, right: 1 };
 let layout    = [];
@@ -1347,9 +1403,37 @@ function updateProductNav() {
   ['nav-name','nav-name2'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=name; });
   const np = document.getElementById('nav-prev'); if(np) np.disabled = selProd===0;
   const nn = document.getElementById('nav-next'); if(nn) nn.disabled = selProd===total-1;
+  const gab = document.getElementById('global-apply-btn');
+  if (gab) gab.textContent = `✅ Tüm Ürünlere Uygula (${total} ürün)`;
 }
 function prevProduct() { if (selProd > 0) { selProd--; syncFormFields(); renderLabel(); } }
 function nextProduct() { if (selProd < products.length-1) { selProd++; syncFormFields(); renderLabel(); } }
+ 
+// ─── GLOBAL DATE APPLY ────────────────────────────────────────────────────────
+function applyGlobalDates() {
+  const fdt = document.getElementById('global-fdt')?.value?.trim();
+  const et  = document.getElementById('global-et')?.value?.trim();
+  if (!fdt && !et) {
+    showToast('Lütfen en az bir tarih girin!');
+    return;
+  }
+  let count = 0;
+  products.forEach(p => {
+    if (fdt) p.fiyatDegisimTarihi = fdt;
+    if (et)  p.etiketTarihi = et;
+    count++;
+  });
+  syncFormFields();
+  renderLabel();
+  // Show result
+  const res = document.getElementById('global-date-result');
+  if (res) {
+    res.style.display = 'block';
+    res.textContent = `✅ ${count} ürüne uygulandı!`;
+    setTimeout(() => { res.style.display='none'; }, 3000);
+  }
+  showToast(`${count} ürüne tarih uygulandı!`);
+}
  
 function syncFormFields() {
   const p = getCur();
@@ -1702,9 +1786,13 @@ function exportPDF() {
   const qrData=getQrData();
   const eanNum=getEAN13Number(getCur());
   const html=getPrintHTML();
-  const hint=`<div style="font-size:13px;color:#555;background:#f5f5f5;padding:10px 16px;border-radius:6px;margin-bottom:16px;font-family:sans-serif;text-align:center">📄 PDF için: <strong>Yazdır → PDF Olarak Kaydet</strong> · ${W}×${H}mm</div>`;
+  const hint=`<div class="hint-bar">📄 PDF için: <strong>Yazdır → Yazıcı: PDF Olarak Kaydet</strong> · ${W}×${H}mm</div>`;
   const script=getCodeScript(qrData,eanNum)+'setTimeout(function(){window.print();},800);';
-  const css=`*{margin:0;padding:0;box-sizing:border-box;}@media print{@page{size:${W}mm ${H}mm;margin:0;}div[style*="background:#f5f5"]{display:none!important;}}body{background:#fff;padding:20px;display:flex;flex-direction:column;align-items:center;gap:16px;font-family:sans-serif;}img{image-rendering:pixelated;display:block;}`;
+  const css=`*{margin:0;padding:0;box-sizing:border-box;}
+  @media print{@page{size:${W}mm ${H}mm;margin:0;}.hint-bar{display:none!important;}body{padding:0!important;}}
+  body{background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;}
+  .hint-bar{font-size:12px;color:#555;background:#f5f5f5;padding:8px 16px;border-radius:6px;margin-bottom:10px;text-align:center;}
+  img{image-rendering:pixelated;display:block;}`;
   openPrintWindow(getCur().urunAdi||'Etiket', `<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>${hint}${html}`, script, css);
 }
  
@@ -1857,8 +1945,8 @@ function buildAllLabelsHTML(forPDF) {
  
   selProd = savedProd;
  
-  const hint = forPDF ? `<div style="font-size:13px;color:#555;background:#f5f5f5;padding:10px 16px;border-radius:6px;margin-bottom:16px;font-family:sans-serif;text-align:center">📄 PDF için: <strong>Yazdır → Yazıcı: PDF Olarak Kaydet</strong> &nbsp;·&nbsp; Boyut: ${W}×${H}mm &nbsp;·&nbsp; ${products.length} etiket</div>` : '';
-  const css = `*{margin:0;padding:0;box-sizing:border-box;}body{background:#fff;font-family:sans-serif;}@media print{@page{size:${W}mm ${H}mm;margin:0;}.lbl{page-break-after:always;margin-bottom:0!important;}body{padding:0;}div[style*="background:#f5f5"]{display:none!important;}}`;
+  const hint = forPDF ? `<div class="hint-bar">📄 PDF için: <strong>Yazdır → PDF Olarak Kaydet</strong> · ${W}×${H}mm · ${products.length} etiket</div>` : '';
+  const css = `*{margin:0;padding:0;box-sizing:border-box;}body{background:#fff;font-family:sans-serif;}.hint-bar{font-size:12px;color:#555;background:#f5f5f5;padding:8px 16px;border-radius:6px;margin-bottom:10px;text-align:center;font-family:sans-serif;}@media print{@page{size:${W}mm ${H}mm;margin:0;}.lbl{page-break-after:always;margin-bottom:0!important;}body{padding:0;}.hint-bar{display:none!important;}}`;
  
   return { labelsHtml, eanScriptDef, initScript, hint, css };
 }
