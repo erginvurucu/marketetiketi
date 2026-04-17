@@ -1,83 +1,179 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const Home = () => {
-  return (
-    <div style={{ fontFamily: "'Nunito', sans-serif", color: '#1f2937', backgroundColor: '#f9fafb' }}>
-      
-      {/* --- NAVBAR --- */}
-      <nav style={{ padding: '20px 5%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'white', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-        <div style={{ fontSize: '24px', fontWeight: '900', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          🏷️ <span style={{ color: '#111827' }}>MarketEtiketi</span>
-        </div>
-        <Link to="/editor" style={{ textDecoration: 'none', backgroundColor: '#16a34a', color: 'white', padding: '10px 25px', borderRadius: '50px', fontWeight: '700', transition: '0.3s' }}>
-          Editörü Aç
-        </Link>
-      </nav>
+  useEffect(() => {
+    // Sayfa başlığı SEO için kritik
+    document.title = "Ücretsiz Market Fiyat Etiket Programı | Raf Etiketi Tasarım";
+    window.scrollTo(0, 0);
 
-      {/* --- HERO SECTION (Giriş) --- */}
-      <header style={{ padding: '80px 5%', textAlign: 'center', background: 'linear-gradient(180deg, white 0%, #f0fdf4 100%)' }}>
-        <h1 style={{ fontSize: 'clamp(32px, 5vw, 56px)', fontWeight: '900', lineHeight: '1.1', marginBottom: '20px', color: '#111827' }}>
-          Profesyonel Fiyat Etiketlerini <br />
-          <span style={{ color: '#16a34a' }}>Saniyeler İçinde</span> Hazırlayın
-        </h1>
-        <p style={{ fontSize: '18px', color: '#4b5563', maxWidth: '700px', margin: '0 auto 40px', lineHeight: '1.6' }}>
-          Marketiniz için QR kodlu, barkodlu ve Excel destekli raf etiketlerini tamamen ücretsiz ve online olarak tasarlayın. Kurulum gerektirmez.
+    // Animasyon efekti
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  }, []);
+
+  return (
+    <div className="seo-home">
+      <style>{`
+        .seo-home {
+          font-family: 'Calibri', 'Candara', 'Segoe UI', 'Arial', sans-serif;
+          background-color: #f8fafc;
+          color: #1e293b;
+          line-height: 1.7;
+        }
+
+        /* Hero Alanı - H1 */
+        .hero-box {
+          padding: 100px 5% 60px;
+          text-align: center;
+          background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+        }
+        .hero-box h1 {
+          font-size: clamp(32px, 5vw, 64px);
+          font-weight: 800;
+          color: #065f46;
+          margin-bottom: 25px;
+          line-height: 1.2;
+        }
+        .hero-box p {
+          font-size: 19px;
+          color: #475569;
+          max-width: 850px;
+          margin: 0 auto 40px;
+        }
+
+        /* CTA Buton */
+        .cta-btn {
+          background: #16a34a;
+          color: white;
+          padding: 20px 50px;
+          border-radius: 50px;
+          text-decoration: none;
+          font-weight: bold;
+          font-size: 20px;
+          display: inline-block;
+          transition: 0.3s;
+          box-shadow: 0 10px 20px rgba(22, 163, 74, 0.2);
+        }
+        .cta-btn:hover {
+          transform: translateY(-3px);
+          background: #15803d;
+          box-shadow: 0 15px 30px rgba(22, 163, 74, 0.3);
+        }
+
+        /* Blog ve İçerik Bölümleri - H2 & H3 */
+        .content-wrap {
+          max-width: 1100px;
+          margin: 0 auto;
+          padding: 60px 5%;
+        }
+        .seo-section {
+          background: white;
+          padding: 50px;
+          border-radius: 30px;
+          margin-bottom: 40px;
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+        .seo-section h2 {
+          font-size: 32px;
+          color: #064e3b;
+          margin-bottom: 20px;
+          border-left: 5px solid #16a34a;
+          padding-left: 15px;
+        }
+        .seo-section h3 {
+          font-size: 24px;
+          color: #16a34a;
+          margin-top: 30px;
+          margin-bottom: 15px;
+        }
+        .feature-list {
+          list-style: none;
+          padding: 0;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 20px;
+          margin-top: 30px;
+        }
+        .feature-list li {
+          background: #f0fdf4;
+          padding: 20px;
+          border-radius: 15px;
+          border-left: 4px solid #16a34a;
+        }
+
+        /* Animasyon */
+        .reveal { opacity: 0; transform: translateY(20px); transition: 0.8s ease-out; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        footer { background: #064e3b; color: #d1fae5; padding: 50px 5%; text-align: center; margin-top: 60px; }
+      `}</style>
+
+      {/* --- ANA BAŞLIK (H1) --- */}
+      <header className="hero-box reveal">
+        <h1>Profesyonel Market ve Mağaza <br/>Fiyat Etiketi Çözümleri</h1>
+        <p>
+          İşletmenizin raf düzenini profesyonel bir seviyeye taşımak ve fiyat karmaşasına son vermek için geliştirdiğimiz 
+          <strong> Mağaza Fiyat Etiket Editörü</strong>, hız ve estetiği bir araya getiriyor.
         </p>
-        <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Link to="/editor" style={{ textDecoration: 'none', backgroundColor: '#16a34a', color: 'white', padding: '18px 40px', borderRadius: '12px', fontSize: '18px', fontWeight: '800', boxShadow: '0 10px 20px rgba(22, 163, 74, 0.2)' }}>
-            🚀 Ücretsiz Başla
-          </Link>
-          <a href="#ozellikler" style={{ textDecoration: 'none', backgroundColor: 'white', color: '#374151', padding: '18px 40px', borderRadius: '12px', fontSize: '18px', fontWeight: '700', border: '1px solid #d1d5db' }}>
-            Özellikleri İncele
-          </a>
-        </div>
+        <Link to="/editor" className="cta-btn">Ücretsiz Etiket Tasarla →</Link>
       </header>
 
-      {/* --- İSTATİSTİK / GÜVEN BANT --- */}
-      <div id="ozellikler" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '30px', padding: '60px 5%', backgroundColor: 'white' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '40px', marginBottom: '10px' }}>⚡</div>
-          <h3 style={{ fontWeight: '800' }}>Işık Hızında</h3>
-          <p style={{ color: '#6b7280' }}>Excel listenizi yükleyin, etiketleriniz anında hazır olsun.</p>
-        </div>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '40px', marginBottom: '10px' }}>📱</div>
-          <h3 style={{ fontWeight: '800' }}>QR Kod Desteği</h3>
-          <p style={{ color: '#6b7280' }}>Müşterileriniz için ürün detaylarına giden QR kodlar ekleyin.</p>
-        </div>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '40px', marginBottom: '10px' }}>🖨️</div>
-          <h3 style={{ fontWeight: '800' }}>Kolay Yazdırma</h3>
-          <p style={{ color: '#6b7280' }}>A4 veya özel etiket kağıtlarına tam uyumlu PDF çıktısı.</p>
-        </div>
-      </div>
+      <main className="content-wrap">
+        {/* --- İKİNCİ BÖLÜM (H2) --- */}
+        <section className="seo-section reveal">
+          <h2>Hızlı, Pratik ve Ücretsiz Fiyat Etiket Programı</h2>
+          <p>
+            Küçük esnafımızdan büyük market zincirlerine kadar herkesin ihtiyacına hitap eden <strong>Bakkal Etiket Programı</strong> ve 
+            gelişmiş <strong>Market Fiyat Etiket Programı</strong> modüllerimizle tanışın. Sektörde en çok ihtiyaç duyulan 
+            <strong> Toplu Market Etiketi Basma</strong> özelliği ile yüzlerce ürünün fiyatını aynı anda güncelleyebilir, zaman kaybının önüne geçebilirsiniz.
+          </p>
+          <p>
+            Üstelik temel özelliklerimizi kullanmak için bir servet ödemenize gerek yok; <strong>Ücretsiz Fiyat Etiket Programı</strong> arayışındaki 
+            işletmeler için sunduğumuz çözümlerle maliyetlerinizi düşürüyoruz.
+          </p>
+        </section>
 
-      {/* --- NASIL ÇALIŞIR? --- */}
-      <section style={{ padding: '80px 5%', backgroundColor: '#f3f4f6' }}>
-        <h2 style={{ textAlign: 'center', fontSize: '32px', fontWeight: '900', marginBottom: '50px' }}>3 Adımda Etiket Basın</h2>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
-          {[
-            { s: "1", t: "Bilgileri Girin", d: "Ürün adı, fiyatı ve birim bilgilerini yazın veya Excel'den aktarın." },
-            { s: "2", t: "Tasarımı Seçin", d: "Hazır şablonlarımızdan marketinize en uygun olanı belirleyin." },
-            { s: "3", t: "PDF Olarak Al", d: "Yazdır butonuna basın ve profesyonel çıktılarınızı alın." }
-          ].map((item, index) => (
-            <div key={index} style={{ backgroundColor: 'white', padding: '30px', borderRadius: '20px', width: '300px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
-              <span style={{ backgroundColor: '#16a34a', color: 'white', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', fontWeight: '900', marginBottom: '20px' }}>{item.s}</span>
-              <h4 style={{ fontWeight: '800', marginBottom: '10px' }}>{item.t}</h4>
-              <p style={{ color: '#6b7280', fontSize: '14px', lineHeight: '1.5' }}>{item.d}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+        {/* --- ÜÇÜNCÜ BÖLÜM (H2 & H3) --- */}
+        <section className="seo-section reveal">
+          <h2>Sektörel Raf Fiyat Etiketi Tasarımı</h2>
+          <p>
+            Her mağazanın ruhu farklıdır. Bu yüzden <strong>Mağaza Raf Etiketi Programı</strong> aracımız; manav, şarküteri, kasap veya züccaciye 
+            gibi farklı alanlara özel <strong>Raf Fiyat Etiketi Tasarımı</strong> yapmanıza imkan tanır.
+          </p>
 
-      {/* --- FOOTER --- */}
-      <footer style={{ padding: '60px 5%', backgroundColor: '#111827', color: 'white', textAlign: 'center' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: '900', marginBottom: '20px' }}>Market Fiyat Etiketi Sistemi</h2>
-        <p style={{ opacity: '0.6', maxWidth: '600px', margin: '0 auto 30px' }}>Esnaflar ve mağaza sahipleri için geliştirilmiş ücretsiz yardımcı araçtır.</p>
-        <div style={{ borderTop: '1px solid #374151', paddingTop: '30px', fontSize: '14px', opacity: '0.5' }}>
-          © 2026 marketfiyatetiketi.com - Tüm Hakları Saklıdır.
-        </div>
+          <ul className="feature-list">
+            <li>
+              <h3>Mağaza Ürün Fiyat Etiketi</h3>
+              Şık, okunaklı ve modern tasarımlar ile müşteri memnuniyetini artırın.
+            </li>
+            <li>
+              <h3>Market Ürün Fiyat Etiketi</h3>
+              Barkod uyumlu, standart ölçülerde seri üretim ve hızlı baskı imkanı.
+            </li>
+            <li>
+              <h3>Fiyat Etiket Programı</h3>
+              Excel entegrasyonu ile hatasız veri aktarımı ve anlık fiyat güncelleme.
+            </li>
+          </ul>
+        </section>
+
+        {/* --- SON MESAJ --- */}
+        <section className="reveal" style={{textAlign: 'center', padding: '40px 0'}}>
+          <p style={{fontSize: '20px', fontStyle: 'italic', color: '#065f46'}}>
+            "MarketFiyatEtiketi.com olarak, sadece ürün satmıyor; işletmenizin operasyonel gücünü artıracak dijital araçlar sunuyoruz."
+          </p>
+          <div style={{marginTop: '30px'}}>
+             <Link to="/editor" className="cta-btn">Değişimi Fark Edin - Hemen Başlayın</Link>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <p>© 2026 MarketFiyatEtiketi.com — Dijital Raf ve Fiyatlandırma Çözümleri</p>
       </footer>
     </div>
   );
